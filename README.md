@@ -1,4 +1,4 @@
-# 🎙️ DiktatApp
+# 🎙️ Diktat-App
 
 **Automatisches Diktat für die Schule – direkt im Browser, installierbar auf iPhone & Android.**
 
