@@ -12,152 +12,146 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --green:   #2d6a4f; --greenl:  #52b788;
-  --greenbg: #e8f5ee; --yellow:  #f4d35e;
-  --red:     #c9184a; --bg:      #fdf8f0;
-  --paper:   #fffef9; --ink:     #1a1a2e;
-  --muted:   #888;    --rule:    #d4c5a9;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bot: env(safe-area-inset-bottom, 0px);
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#2d6a4f;--greenl:#52b788;--greenbg:#e8f5ee;
+  --yellow:#f4d35e;--red:#c9184a;--bg:#fdf8f0;
+  --paper:#fffef9;--ink:#1a1a2e;--muted:#888;--rule:#d4c5a9;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
 }
+html,body{height:100%;width:100%;background:var(--bg);font-family:'Lora',Georgia,serif;color:var(--ink);overflow:hidden}
+#app{display:flex;flex-direction:column;height:100%;width:100%}
 
-html, body { height: 100%; width: 100%; background: var(--bg); font-family: 'Lora', Georgia, serif; color: var(--ink); overflow: hidden; }
+/* TOPBAR */
+.topbar{background:var(--green);color:#fff;padding:calc(var(--safe-top) + 12px) 16px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,0.15);gap:10px}
+.topbar-left h1{font-size:1.1rem;font-weight:600}
+.topbar-left .sub{font-size:0.7rem;opacity:0.8;font-style:italic;margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.ui-lang-toggle{display:flex;background:rgba(255,255,255,0.15);border-radius:20px;overflow:hidden}
+.ui-lang-btn{padding:4px 10px;font-family:'DM Mono',monospace;font-size:0.7rem;border:none;background:none;color:rgba(255,255,255,0.7);cursor:pointer;transition:all 0.2s}
+.ui-lang-btn.active{background:rgba(255,255,255,0.3);color:#fff;font-weight:500}
 
-#app { display: flex; flex-direction: column; height: 100%; width: 100%; }
+/* SCREENS */
+.screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:16px 16px 0;opacity:0;pointer-events:none;transform:translateX(20px);transition:opacity 0.25s,transform 0.25s}
+.screen.active{opacity:1;pointer-events:all;transform:translateX(0)}
 
-.topbar {
-  background: var(--green); color: #fff;
-  padding: calc(var(--safe-top) + 12px) 20px 12px;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+/* BOTTOM NAV */
+.bottom-nav{display:flex;background:var(--paper);border-top:1px solid var(--rule);padding-bottom:var(--safe-bot);flex-shrink:0}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 6px;background:none;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);transition:color 0.2s;gap:2px}
+.nav-btn .icon{font-size:1.35rem;line-height:1}
+.nav-btn.active{color:var(--green);font-weight:500}
+
+/* CARDS */
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,0.05)}
+.card-title{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px}
+
+/* LANGUAGE GRID */
+.lang-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
+.lang-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;background:var(--paper);border:2px solid var(--rule);border-radius:10px;cursor:pointer;transition:all 0.2s;font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted)}
+.lang-btn .flag{font-size:1.5rem;line-height:1}
+.lang-btn.active{border-color:var(--green);background:var(--greenbg);color:var(--green);font-weight:500}
+
+/* INPUT */
+.input-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.method-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px 12px;background:var(--paper);border:2px solid var(--rule);border-radius:12px;cursor:pointer;font-family:'Lora',serif;font-size:0.85rem;color:var(--ink);transition:all 0.2s}
+.method-btn:active{border-color:var(--greenl);background:var(--greenbg)}
+.method-btn .icon{font-size:2.2rem}
+textarea#pasteArea{width:100%;min-height:140px;font-family:'Lora',serif;font-size:0.95rem;line-height:1.6;color:var(--ink);background:var(--bg);border:1.5px solid var(--rule);border-radius:8px;padding:12px;resize:vertical;outline:none;transition:border-color 0.2s}
+textarea#pasteArea:focus{border-color:var(--greenl)}
+#photoPreview{width:100%;border-radius:8px;margin-bottom:10px;display:none;max-height:200px;object-fit:cover}
+.ocr-status{font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--green);text-align:center;min-height:1.2rem;margin-bottom:8px}
+.progress-ocr{height:4px;background:#e0d8cc;border-radius:2px;margin-bottom:8px;overflow:hidden;display:none}
+.progress-ocr-fill{height:100%;background:var(--greenl);border-radius:2px;transition:width 0.3s;width:0}
+.btn-primary{width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:10px;font-family:'Lora',serif;font-size:1rem;font-weight:600;cursor:pointer;transition:background 0.2s,transform 0.1s;letter-spacing:0.02em}
+.btn-primary:active{transform:scale(0.98);background:#245a40}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed}
+.btn-secondary{width:100%;padding:11px;background:transparent;color:var(--green);border:1.5px solid var(--green);border-radius:10px;font-family:'Lora',serif;font-size:0.9rem;cursor:pointer;transition:all 0.2s;margin-top:8px}
+.btn-secondary:active{background:var(--greenbg)}
+#inputFileHidden{display:none}
+
+/* PLAYER */
+.player-empty{text-align:center;padding:40px 20px;color:var(--muted);font-style:italic;font-size:0.9rem}
+.progress-wrap{height:5px;background:#e0d8cc;border-radius:3px;margin-bottom:12px;overflow:hidden}
+.progress-fill{height:100%;background:var(--greenl);border-radius:3px;transition:width 0.4s;width:0}
+.player-status{font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--green);text-align:center;min-height:1.1rem;margin-bottom:10px}
+
+/* VOICE INDICATOR */
+.voice-indicator{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);text-align:center;margin-bottom:10px;min-height:1rem}
+.voice-indicator.good{color:var(--green)}
+.voice-indicator.warn{color:#e67e00}
+
+/* PLAYER CONTROLS ROW 1 */
+.player-controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+/* HIDE TOGGLE ROW */
+.hide-row{display:flex;align-items:center;justify-content:space-between;padding:8px 4px;margin-bottom:10px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.hide-row-label{font-size:0.85rem;display:flex;align-items:center;gap:6px}
+.toggle{width:44px;height:24px;background:var(--rule);border-radius:12px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0}
+.toggle.on{background:var(--green)}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+.toggle.on::after{transform:translateX(20px)}
+
+/* SENTENCE LIST */
+.sentence-list{list-style:none;margin-bottom:14px;display:flex;flex-direction:column;gap:6px}
+.sentence-list li{padding:10px 12px;border-radius:8px;border-left:3px solid transparent;font-size:0.93rem;line-height:1.55;transition:background 0.25s,border-color 0.25s,filter 0.4s,color 0.4s;cursor:pointer;position:relative}
+.sentence-list li:hover{background:#f0ebe0}
+.sentence-list li.active{background:var(--greenbg);border-left-color:var(--greenl)}
+.sentence-list li.done{color:#bbb}
+
+/* HIDDEN STATE */
+.sentence-list.hide-mode li.hidden-text{
+  filter:blur(6px);
+  color:transparent;
+  background:#f0ebe0;
+  border-left-color:var(--rule);
+  cursor:default;
+  user-select:none;
 }
-.topbar h1 { font-size: 1.15rem; font-weight: 600; letter-spacing: 0.02em; }
-.topbar .sub { font-size: 0.72rem; opacity: 0.8; font-style: italic; margin-top: 1px; }
+.sentence-list.hide-mode li.hidden-text:hover{background:#f0ebe0}
+.sentence-list.hide-mode li.active{filter:blur(6px);color:transparent;background:#e0f0e8;border-left-color:var(--greenl)}
+.sentence-list.hide-mode li.done{filter:blur(6px);color:transparent}
 
-.screens { flex: 1; overflow: hidden; position: relative; }
+.s-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:0.6rem;background:var(--yellow);color:#5a4a00;border-radius:3px;padding:1px 5px;margin-left:5px;vertical-align:middle;min-width:32px;text-align:center}
 
-.screen {
-  position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
-  padding: 16px 16px 0; opacity: 0; pointer-events: none;
-  transform: translateX(20px); transition: opacity 0.25s, transform 0.25s;
-}
-.screen.active { opacity: 1; pointer-events: all; transform: translateX(0); }
+.ctrl-btn{padding:12px 6px;border:none;border-radius:10px;font-family:'Lora',serif;font-size:0.85rem;cursor:pointer;transition:all 0.2s;text-align:center}
+.ctrl-btn:active{transform:scale(0.96)}
+.ctrl-btn.start{background:var(--green);color:#fff;font-weight:600}
+.ctrl-btn.repeat{background:var(--yellow);color:#5a4a00}
+.ctrl-btn.stop{background:var(--red);color:#fff}
+.ctrl-btn:disabled{opacity:0.35;cursor:not-allowed}
 
-.bottom-nav { display: flex; background: var(--paper); border-top: 1px solid var(--rule); padding-bottom: var(--safe-bot); flex-shrink: 0; }
-.nav-btn {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 8px 0 6px; background: none; border: none; cursor: pointer;
-  font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted);
-  transition: color 0.2s; gap: 2px;
-}
-.nav-btn .icon { font-size: 1.35rem; line-height: 1; }
-.nav-btn.active { color: var(--green); font-weight: 500; }
-
-.card { background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-.card-title { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-
-.input-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.method-btn {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 6px; padding: 18px 12px; background: var(--paper);
-  border: 2px solid var(--rule); border-radius: 12px; cursor: pointer;
-  font-family: 'Lora', serif; font-size: 0.85rem; color: var(--ink); transition: all 0.2s;
-}
-.method-btn:hover, .method-btn:active { border-color: var(--greenl); background: var(--greenbg); }
-.method-btn .icon { font-size: 2.2rem; }
-
-textarea#pasteArea {
-  width: 100%; min-height: 140px; font-family: 'Lora', serif; font-size: 0.95rem;
-  line-height: 1.6; color: var(--ink); background: var(--bg);
-  border: 1.5px solid var(--rule); border-radius: 8px; padding: 12px;
-  resize: vertical; outline: none; transition: border-color 0.2s;
-}
-textarea#pasteArea:focus { border-color: var(--greenl); }
-
-#photoPreview { width: 100%; border-radius: 8px; margin-bottom: 10px; display: none; max-height: 200px; object-fit: cover; }
-
-.ocr-status { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--green); text-align: center; min-height: 1.2rem; margin-bottom: 8px; }
-
-.progress-ocr { height: 4px; background: #e0d8cc; border-radius: 2px; margin-bottom: 8px; overflow: hidden; display: none; }
-.progress-ocr-fill { height: 100%; background: var(--greenl); border-radius: 2px; transition: width 0.3s; width: 0; }
-
-.btn-primary {
-  width: 100%; padding: 14px; background: var(--green); color: #fff;
-  border: none; border-radius: 10px; font-family: 'Lora', serif;
-  font-size: 1rem; font-weight: 600; cursor: pointer;
-  transition: background 0.2s, transform 0.1s; letter-spacing: 0.02em;
-}
-.btn-primary:active { transform: scale(0.98); background: #245a40; }
-.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.btn-secondary {
-  width: 100%; padding: 11px; background: transparent; color: var(--green);
-  border: 1.5px solid var(--green); border-radius: 10px;
-  font-family: 'Lora', serif; font-size: 0.9rem; cursor: pointer;
-  transition: all 0.2s; margin-top: 8px;
-}
-.btn-secondary:active { background: var(--greenbg); }
-
-#inputFileHidden { display: none; }
-
-/* Player */
-.player-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-style: italic; font-size: 0.9rem; }
-.progress-wrap { height: 5px; background: #e0d8cc; border-radius: 3px; margin-bottom: 12px; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--greenl); border-radius: 3px; transition: width 0.4s; width: 0; }
-.player-status { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--green); text-align: center; min-height: 1.1rem; margin-bottom: 12px; }
-.sentence-list { list-style: none; margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px; }
-.sentence-list li { padding: 10px 12px; border-radius: 8px; border-left: 3px solid transparent; font-size: 0.93rem; line-height: 1.55; transition: background 0.25s, border-color 0.25s; cursor: pointer; }
-.sentence-list li:hover { background: #f0ebe0; }
-.sentence-list li.active { background: var(--greenbg); border-left-color: var(--greenl); }
-.sentence-list li.done { color: #bbb; }
-.s-badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 0.6rem; background: var(--yellow); color: #5a4a00; border-radius: 3px; padding: 1px 5px; margin-left: 5px; vertical-align: middle; min-width: 32px; text-align: center; }
-.player-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-.ctrl-btn { padding: 12px 6px; border: none; border-radius: 10px; font-family: 'Lora', serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; text-align: center; }
-.ctrl-btn:active { transform: scale(0.96); }
-.ctrl-btn.start { background: var(--green); color: #fff; font-weight: 600; }
-.ctrl-btn.start:hover:not(:disabled) { background: #245a40; }
-.ctrl-btn.repeat { background: var(--yellow); color: #5a4a00; }
-.ctrl-btn.stop { background: var(--red); color: #fff; }
-.ctrl-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-
-/* Settings */
-.setting-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.setting-row label { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); min-width: 70px; }
-.setting-row input[type=range] { flex: 1; accent-color: var(--green); }
-.setting-val { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--green); min-width: 38px; text-align: right; }
-.repeat-btns { display: flex; gap: 8px; }
-.rep-btn { flex: 1; padding: 9px; border: 1.5px solid var(--rule); border-radius: 8px; background: var(--paper); font-family: 'DM Mono', monospace; font-size: 0.8rem; cursor: pointer; text-align: center; color: var(--ink); transition: all 0.2s; }
-.rep-btn.active { background: var(--green); color: #fff; border-color: var(--green); }
-.toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.toggle-row span { font-size: 0.88rem; }
-.toggle { width: 44px; height: 24px; background: var(--rule); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s; }
-.toggle.on { background: var(--green); }
-.toggle::after { content: ''; position: absolute; width: 18px; height: 18px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-.toggle.on::after { transform: translateX(20px); }
-
-.info-box { background: #e8f5ee; border: 1px solid var(--greenl); border-radius: 8px; padding: 12px; font-size: 0.82rem; line-height: 1.6; color: var(--green); margin-bottom: 12px; }
-.info-box strong { display: block; margin-bottom: 4px; }
-
-.screen-pad { height: 16px; flex-shrink: 0; }
-.screen::-webkit-scrollbar { width: 3px; }
-.screen::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
-
-.install-hint { background: var(--greenbg); border: 1px solid var(--greenl); border-radius: 8px; padding: 10px 12px; font-size: 0.8rem; line-height: 1.5; color: var(--green); margin-bottom: 12px; display: none; }
+/* SETTINGS */
+.setting-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.setting-row label{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);min-width:70px}
+.setting-row input[type=range]{flex:1;accent-color:var(--green)}
+.setting-val{font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--green);min-width:38px;text-align:right}
+.repeat-btns{display:flex;gap:8px}
+.rep-btn{flex:1;padding:9px;border:1.5px solid var(--rule);border-radius:8px;background:var(--paper);font-family:'DM Mono',monospace;font-size:0.8rem;cursor:pointer;text-align:center;color:var(--ink);transition:all 0.2s}
+.rep-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.toggle-row span{font-size:0.88rem}
+.info-box{background:var(--greenbg);border:1px solid var(--greenl);border-radius:8px;padding:12px;font-size:0.82rem;line-height:1.6;color:var(--green);margin-bottom:12px}
+.info-box strong{display:block;margin-bottom:4px}
+.screen-pad{height:16px;flex-shrink:0}
+.screen::-webkit-scrollbar{width:3px}
+.screen::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
+.install-hint{background:var(--greenbg);border:1px solid var(--greenl);border-radius:8px;padding:10px 12px;font-size:0.8rem;line-height:1.5;color:var(--green);margin-bottom:12px;display:none}
 </style>
 </head>
 <body>
 <div id="app">
 
   <div class="topbar">
-    <div>
-      <div class="topbar h1">🎙️ DiktatApp</div>
-      <div class="sub">Automatisches Diktat für die Schule</div>
+    <div class="topbar-left">
+      <h1>🎙️ DiktatApp</h1>
+      <div class="sub" id="topSub">Automatisches Diktat für die Schule</div>
     </div>
-    <span id="topbarIcon" style="font-size:1.4rem">📝</span>
+    <div class="topbar-right">
+      <div class="ui-lang-toggle">
+        <button class="ui-lang-btn active" id="uilDE" onclick="setUiLang('de')">DE</button>
+        <button class="ui-lang-btn"        id="uilEN" onclick="setUiLang('en')">EN</button>
+      </div>
+    </div>
   </div>
 
   <div class="screens">
@@ -166,40 +160,48 @@ textarea#pasteArea:focus { border-color: var(--greenl); }
     <div class="screen active" id="screenInput">
       <div class="install-hint" id="installHint"></div>
       <div class="card">
-        <div class="card-title">Text eingeben</div>
+        <div class="card-title" data-i18n="dictLang">Diktat-Sprache</div>
+        <div class="lang-grid">
+          <button class="lang-btn active" data-lang="de-DE" data-tess="deu" onclick="setDictLang(this)"><span class="flag">🇩🇪</span><span>Deutsch</span></button>
+          <button class="lang-btn" data-lang="en-US" data-tess="eng" onclick="setDictLang(this)"><span class="flag">🇬🇧</span><span>English</span></button>
+          <button class="lang-btn" data-lang="fr-FR" data-tess="fra" onclick="setDictLang(this)"><span class="flag">🇫🇷</span><span>Français</span></button>
+          <button class="lang-btn" data-lang="es-ES" data-tess="spa" onclick="setDictLang(this)"><span class="flag">🇪🇸</span><span>Español</span></button>
+          <button class="lang-btn" data-lang="it-IT" data-tess="ita" onclick="setDictLang(this)"><span class="flag">🇮🇹</span><span>Italiano</span></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" data-i18n="enterText">Text eingeben</div>
         <div class="input-methods">
-          <button class="method-btn" onclick="focusPaste()">
-            <span class="icon">📋</span>
-            <span>Eintippen &amp; Einfügen</span>
-          </button>
-          <button class="method-btn" onclick="triggerPhoto()">
-            <span class="icon">📷</span>
-            <span>Foto aufnehmen</span>
-          </button>
+          <button class="method-btn" onclick="focusPaste()"><span class="icon">📋</span><span data-i18n="pasteBtn">Eintippen &amp; Einfügen</span></button>
+          <button class="method-btn" onclick="triggerPhoto()"><span class="icon">📷</span><span data-i18n="photoBtn">Foto aufnehmen</span></button>
         </div>
         <input type="file" id="inputFileHidden" accept="image/*" capture="environment">
-        <img id="photoPreview" alt="Vorschau">
-        <div class="progress-ocr" id="ocrProgressWrap">
-          <div class="progress-ocr-fill" id="ocrProgressFill"></div>
-        </div>
+        <img id="photoPreview" alt="Preview">
+        <div class="progress-ocr" id="ocrProgressWrap"><div class="progress-ocr-fill" id="ocrProgressFill"></div></div>
         <div class="ocr-status" id="ocrStatus"></div>
-        <textarea id="pasteArea" placeholder="Diktat-Text hier einfügen oder eintippen…"></textarea>
+        <textarea id="pasteArea" data-i18n-ph="textPlaceholder"></textarea>
       </div>
-      <button class="btn-primary" onclick="loadText()">Diktat starten →</button>
-      <button class="btn-secondary" onclick="loadSample()">Beispieltext laden</button>
+      <button class="btn-primary" onclick="loadText()" data-i18n="startBtn">Diktat starten →</button>
+      <button class="btn-secondary" onclick="loadSample()" data-i18n="sampleBtn">Beispieltext laden</button>
       <div class="screen-pad"></div>
     </div>
 
     <!-- PLAYER -->
     <div class="screen" id="screenPlayer">
-      <div id="playerEmpty" class="player-empty">← Text eingeben und<br>„Diktat starten" drücken</div>
+      <div id="playerEmpty" class="player-empty" data-i18n="playerEmpty">← Text eingeben und „Diktat starten" drücken</div>
       <div id="playerContent" style="display:none">
         <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="player-status" id="playerStatus">Bereit ▶</div>
+        <div class="player-status" id="playerStatus"></div>
+        <div class="voice-indicator" id="voiceIndicator"></div>
         <div class="player-controls">
-          <button class="ctrl-btn start" id="btnStart" onclick="startDiktat()">▶ Start</button>
-          <button class="ctrl-btn repeat" id="btnRepeat" onclick="repeatCurrent()" disabled>↩ Wdh.</button>
-          <button class="ctrl-btn stop"  id="btnStop"   onclick="stopDiktat()"   disabled>⏹ Stop</button>
+          <button class="ctrl-btn start"  id="btnStart"  onclick="startDiktat()"   data-i18n="btnStart">▶ Start</button>
+          <button class="ctrl-btn repeat" id="btnRepeat" onclick="repeatCurrent()" data-i18n="btnRepeat" disabled>↩ Wdh.</button>
+          <button class="ctrl-btn stop"   id="btnStop"   onclick="stopDiktat()"    data-i18n="btnStop"   disabled>⏹ Stop</button>
+        </div>
+        <!-- HIDE TOGGLE -->
+        <div class="hide-row">
+          <span class="hide-row-label">🙈 <span data-i18n="hideLabel">Text verbergen</span></span>
+          <div class="toggle" id="hideToggle" onclick="toggleHide()"></div>
         </div>
         <ol class="sentence-list" id="sentenceList"></ol>
       </div>
@@ -209,14 +211,14 @@ textarea#pasteArea:focus { border-color: var(--greenl); }
     <!-- SETTINGS -->
     <div class="screen" id="screenSettings">
       <div class="card">
-        <div class="card-title">Wiedergabe</div>
+        <div class="card-title" data-i18n="settingsPlayback">Wiedergabe</div>
         <div class="setting-row">
-          <label>🐢 Tempo</label>
+          <label data-i18n="tempo">🐢 Tempo</label>
           <input type="range" id="speedSlider" min="0.5" max="1.2" step="0.05" value="0.7">
           <span class="setting-val" id="speedVal">0.70×</span>
         </div>
         <div class="setting-row" style="align-items:flex-start;flex-direction:column;gap:6px">
-          <label>Wiederholungen</label>
+          <label data-i18n="repeats">Wiederholungen</label>
           <div class="repeat-btns">
             <button class="rep-btn" data-v="1" onclick="setRepeat(1)">1×</button>
             <button class="rep-btn" data-v="2" onclick="setRepeat(2)">2×</button>
@@ -225,31 +227,35 @@ textarea#pasteArea:focus { border-color: var(--greenl); }
           </div>
         </div>
         <div class="toggle-row">
-          <span>Satzzeichen ansagen</span>
+          <span data-i18n="punctuation">Satzzeichen ansagen</span>
           <div class="toggle on" id="punctToggle" onclick="togglePunct()"></div>
         </div>
         <div class="setting-row">
-          <label>✍️ Pause</label>
+          <label data-i18n="pause">✍️ Pause</label>
           <input type="range" id="pauseSlider" min="2000" max="8000" step="500" value="4500">
           <span class="setting-val" id="pauseVal">4.5s</span>
         </div>
       </div>
-
       <div class="card">
-        <div class="card-title">Foto-Texterkennung</div>
+        <div class="card-title" data-i18n="voiceTitle">Stimme</div>
         <div class="info-box">
-          <strong>✅ Komplett kostenlos – kein Account nötig</strong>
-          Die Texterkennung läuft direkt auf deinem Gerät via Tesseract.js.
-          Kein Server, keine Daten werden hochgeladen.
+          <strong data-i18n="voiceInfo1">🎙️ Beste Stimme wird automatisch gewählt</strong>
+          <span data-i18n="voiceInfo2">Die App sucht automatisch nach der hochwertigsten verfügbaren Stimme für jede Sprache (z.B. Enhanced/Premium auf iPhone, Google-Stimmen auf Android).</span>
+        </div>
+        <div id="availableVoices" style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);line-height:1.8"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" data-i18n="ocrTitle">Foto-Texterkennung</div>
+        <div class="info-box">
+          <strong data-i18n="ocrInfo1">✅ Komplett kostenlos – kein Account nötig</strong>
+          <span data-i18n="ocrInfo2">Läuft direkt auf deinem Gerät. Keine Daten werden hochgeladen.</span>
         </div>
       </div>
-
       <div class="card">
-        <div class="card-title">App installieren</div>
+        <div class="card-title" data-i18n="installTitle">App installieren</div>
         <div class="info-box">
-          <strong>📱 Auf dem Homescreen installieren:</strong>
-          iPhone/iPad: Safari → Teilen (□↑) → „Zum Home-Bildschirm"<br>
-          Android: Chrome → Menü ⋮ → „App installieren"
+          <strong data-i18n="installInfo1">📱 Auf dem Homescreen installieren:</strong>
+          <span data-i18n="installInfo2">iPhone/iPad: Safari → Teilen (□↑) → „Zum Home-Bildschirm"<br>Android: Chrome → Menü ⋮ → „App installieren"</span>
         </div>
       </div>
       <div class="screen-pad"></div>
@@ -258,222 +264,437 @@ textarea#pasteArea:focus { border-color: var(--greenl); }
   </div>
 
   <nav class="bottom-nav">
-    <button class="nav-btn active" id="nav0" onclick="showScreen(0)"><span class="icon">📝</span><span>Text</span></button>
-    <button class="nav-btn"        id="nav1" onclick="showScreen(1)"><span class="icon">🎙️</span><span>Diktat</span></button>
-    <button class="nav-btn"        id="nav2" onclick="showScreen(2)"><span class="icon">⚙️</span><span>Einstellungen</span></button>
+    <button class="nav-btn active" id="nav0" onclick="showScreen(0)"><span class="icon">📝</span><span data-i18n="navText">Text</span></button>
+    <button class="nav-btn"        id="nav1" onclick="showScreen(1)"><span class="icon">🎙️</span><span data-i18n="navDiktat">Diktat</span></button>
+    <button class="nav-btn"        id="nav2" onclick="showScreen(2)"><span class="icon">⚙️</span><span data-i18n="navSettings">Einstellungen</span></button>
   </nav>
 </div>
 
 <script>
-let sentences  = [];
-let currentIdx = -1;
-let stopReq    = false;
-let rate       = 0.7;
-let repeats    = 3;
-let writePause = 4500;
-let punctOn    = true;
+// ── TRANSLATIONS ──────────────────────────────────────
+const T = {
+  de: {
+    topSub:"Automatisches Diktat für die Schule",
+    dictLang:"Diktat-Sprache",enterText:"Text eingeben",
+    pasteBtn:"Eintippen & Einfügen",photoBtn:"Foto aufnehmen",
+    textPlaceholder:"Diktat-Text hier einfügen oder eintippen…",
+    startBtn:"Diktat starten →",sampleBtn:"Beispieltext laden",
+    playerEmpty:"← Text eingeben und 'Diktat starten' drücken",
+    btnStart:"▶ Start",btnRepeat:"↩ Wdh.",btnStop:"⏹ Stop",
+    hideLabel:"Text verbergen",
+    settingsPlayback:"Wiedergabe",tempo:"🐢 Tempo",repeats:"Wiederholungen",
+    punctuation:"Satzzeichen ansagen",pause:"✍️ Pause",
+    voiceTitle:"Stimme",
+    voiceInfo1:"🎙️ Beste Stimme wird automatisch gewählt",
+    voiceInfo2:"Die App sucht automatisch nach der hochwertigsten verfügbaren Stimme für jede Sprache (z.B. Enhanced/Premium auf iPhone, Google-Stimmen auf Android).",
+    ocrTitle:"Foto-Texterkennung",
+    ocrInfo1:"✅ Komplett kostenlos – kein Account nötig",
+    ocrInfo2:"Läuft direkt auf deinem Gerät. Keine Daten werden hochgeladen.",
+    installTitle:"App installieren",
+    installInfo1:"📱 Auf dem Homescreen installieren:",
+    installInfo2:"iPhone/iPad: Safari → Teilen (□↑) → 'Zum Home-Bildschirm'<br>Android: Chrome → Menü ⋮ → 'App installieren'",
+    navText:"Text",navDiktat:"Diktat",navSettings:"Einstellungen",
+    ready:"Bereit – drücke Start ▶",
+    sentenceStatus:(i,n,r,rn)=>`Satz ${i}/${n} – Lesung ${r} von ${rn}`,
+    writing:s=>`✍️ Schreiben… (${s} Sek.)`,
+    controlReading:"📖 Kontrolllesung…",
+    finished:"✅ Diktat beendet! Stift ablegen.",
+    stopped:"⏹ Gestoppt.",
+    ocrRunning:"🔍 Texterkennung läuft…",
+    ocrProgress:p=>`🔍 Erkenne Text… ${p}%`,
+    ocrDone:"✅ Text erkannt – bitte prüfen.",
+    ocrEmpty:"⚠️ Kein Text erkannt. Bitte manuell eingeben.",
+    ocrError:e=>`❌ Fehler: ${e}`,
+    noText:"Bitte zuerst einen Text eingeben.",
+    installHint:"📱 <strong>Tipp:</strong> Teilen (□↑) → 'Zum Home-Bildschirm' zum Installieren.",
+    voiceUsing:"🎙️ Stimme:",voiceNone:"⚠️ Keine native Stimme gefunden – Standard wird verwendet.",
+  },
+  en: {
+    topSub:"Automatic dictation for school",
+    dictLang:"Dictation language",enterText:"Enter text",
+    pasteBtn:"Type & Paste",photoBtn:"Take a photo",
+    textPlaceholder:"Paste or type dictation text here…",
+    startBtn:"Start dictation →",sampleBtn:"Load sample text",
+    playerEmpty:"← Enter text and press 'Start dictation'",
+    btnStart:"▶ Start",btnRepeat:"↩ Repeat",btnStop:"⏹ Stop",
+    hideLabel:"Hide text",
+    settingsPlayback:"Playback",tempo:"🐢 Speed",repeats:"Repetitions",
+    punctuation:"Announce punctuation",pause:"✍️ Pause",
+    voiceTitle:"Voice",
+    voiceInfo1:"🎙️ Best voice selected automatically",
+    voiceInfo2:"The app automatically picks the highest-quality available voice per language (e.g. Enhanced/Premium on iPhone, Google voices on Android).",
+    ocrTitle:"Photo text recognition",
+    ocrInfo1:"✅ Completely free – no account needed",
+    ocrInfo2:"Runs directly on your device. No data is uploaded.",
+    installTitle:"Install app",
+    installInfo1:"📱 Add to Home Screen:",
+    installInfo2:"iPhone/iPad: Safari → Share (□↑) → 'Add to Home Screen'<br>Android: Chrome → Menu ⋮ → 'Install app'",
+    navText:"Text",navDiktat:"Dictation",navSettings:"Settings",
+    ready:"Ready – press Start ▶",
+    sentenceStatus:(i,n,r,rn)=>`Sentence ${i}/${n} – reading ${r} of ${rn}`,
+    writing:s=>`✍️ Writing… (${s} sec.)`,
+    controlReading:"📖 Final read-through…",
+    finished:"✅ Dictation done! Put down your pen.",
+    stopped:"⏹ Stopped.",
+    ocrRunning:"🔍 Recognising text…",
+    ocrProgress:p=>`🔍 Recognising… ${p}%`,
+    ocrDone:"✅ Text recognised – please check.",
+    ocrEmpty:"⚠️ No text found. Please enter manually.",
+    ocrError:e=>`❌ Error: ${e}`,
+    noText:"Please enter a text first.",
+    installHint:"📱 <strong>Tip:</strong> Share (□↑) → 'Add to Home Screen' to install.",
+    voiceUsing:"🎙️ Voice:",voiceNone:"⚠️ No native voice found – using default.",
+  }
+};
 
+const PUNCT = {
+  "de-DE":{",":" KOMMA ",".":" PUNKT","!":" AUSRUFEZEICHEN","?":" FRAGEZEICHEN",";":" STRICHPUNKT ",":":" DOPPELPUNKT "},
+  "en-US":{",":" COMMA ",".":" FULL STOP","!":" EXCLAMATION MARK","?":" QUESTION MARK",";":" SEMICOLON ",":":" COLON "},
+  "fr-FR":{",":" VIRGULE ",".":" POINT","!":" POINT D'EXCLAMATION","?":" POINT D'INTERROGATION",";":" POINT-VIRGULE ",":":" DEUX-POINTS "},
+  "es-ES":{",":" COMA ",".":" PUNTO","!":" SIGNO DE EXCLAMACIÓN","?":" SIGNO DE INTERROGACIÓN",";":" PUNTO Y COMA ",":":" DOS PUNTOS "},
+  "it-IT":{",":" VIRGOLA ",".":" PUNTO","!":" PUNTO ESCLAMATIVO","?":" PUNTO INTERROGATIVO",";":" PUNTO E VIRGOLA ",":":" DUE PUNTI "}
+};
+
+const SAMPLES = {
+  "de-DE":`Als unser Hund einmal krank war, haben wir ihn in eine Tierklinik gebracht. Dort hat ihn ein Tierarzt untersucht. Daraufhin gab er ihm eine Spritze. Das gefiel ihm gar nicht und er wollte den Tierarzt sogar in den Finger beissen. Wahrscheinlich hatte er Angst vor ihm. Seitdem will unser Hund nicht mehr zum Tierarzt.\n\nWenn er bei der Praxis ankommt, bleibt er im Auto liegen und wir können ihn nicht dazu bringen, dass er freiwillig in die Praxis geht. Deswegen müssen wir ihn jeweils tragen.\n\nIn der Praxis jedoch wird für ihn immer sehr gut geschaut, alle mögen ihn und wenn er gut mitmacht, bekommt er immer etwas Gutes als Belohnung.`,
+  "en-US":`Our dog was once sick, so we took him to an animal clinic. There a vet examined him. Afterwards, the vet gave him an injection. The dog did not like that at all and even tried to bite the vet's finger. He was probably scared of him. Since then, our dog refuses to go to the vet.\n\nWhenever we arrive at the clinic, he stays in the car and we cannot get him to walk in voluntarily. So we have to carry him every time.\n\nHowever, inside the clinic he is always very well looked after, everyone likes him, and if he behaves, he always gets a treat as a reward.`,
+  "fr-FR":`Notre chien était malade un jour, alors nous l'avons emmené dans une clinique vétérinaire. Là, un vétérinaire l'a examiné. Ensuite, il lui a fait une piqûre. Cela ne lui a pas du tout plu et il a même voulu mordre le vétérinaire au doigt. Il avait probablement peur de lui. Depuis lors, notre chien ne veut plus aller chez le vétérinaire.\n\nQuand il arrive devant le cabinet, il reste dans la voiture et nous n'arrivons pas à le faire entrer de son plein gré. C'est pourquoi nous devons le porter à chaque fois.\n\nDans le cabinet cependant, il est toujours très bien soigné, tout le monde l'apprécie et s'il se comporte bien, il reçoit toujours quelque chose de bon en récompense.`,
+  "es-ES":`Nuestro perro estuvo enfermo una vez, así que lo llevamos a una clínica veterinaria. Allí lo examinó un veterinario. Luego le puso una inyección. Al perro no le gustó nada y hasta intentó morder el dedo del veterinario. Probablemente tenía miedo de él. Desde entonces, nuestro perro no quiere volver al veterinario.\n\nCuando llegamos a la consulta, se queda en el coche y no conseguimos que entre voluntariamente. Por eso tenemos que cargarlo cada vez.\n\nSin embargo, en la consulta siempre lo cuidan muy bien, a todos les cae bien y si se porta bien, siempre recibe algo bueno como recompensa.`,
+  "it-IT":`Il nostro cane era malato una volta, quindi lo abbiamo portato in una clinica veterinaria. Lì un veterinario lo ha visitato. Dopodiché gli ha fatto un'iniezione. Al cane non è piaciuto per niente e ha persino cercato di mordere il dito del veterinario. Probabilmente aveva paura di lui. Da allora il nostro cane non vuole più andare dal veterinario.\n\nQuando arriva davanti all'ambulatorio, rimane in macchina e non riusciamo a farlo entrare volontariamente. Quindi dobbiamo portarlo in braccio ogni volta.\n\nNell'ambulatorio però viene sempre curato molto bene, tutti lo vogliono bene e se si comporta bene, riceve sempre qualcosa di buono come premio.`
+};
+
+// ── STATE ─────────────────────────────────────────────
+let uiLang='de', dictLang='de-DE', tessLang='deu';
+let sentences=[], currentIdx=-1, stopReq=false;
+let rate=0.7, repeats=3, writePause=4500, punctOn=true, hideMode=false;
+let voiceCache={};
+
+// ── VOICE SELECTION ───────────────────────────────────
+// Priority scoring for voice quality
+function scoreVoice(v, lang) {
+  const name = v.name.toLowerCase();
+  let score = 0;
+  // Highest: Apple Enhanced / Premium (neural quality)
+  if (name.includes('enhanced')) score += 100;
+  if (name.includes('premium'))  score += 90;
+  // Google voices on Android/Chrome (good quality)
+  if (name.includes('google'))   score += 70;
+  // Microsoft Online (good)
+  if (name.includes('online') || name.includes('natural')) score += 60;
+  // Native/local voices better than remote when no premium available
+  if (v.localService) score += 10;
+  // Avoid "compact" (lowest quality on Apple)
+  if (name.includes('compact')) score -= 50;
+  // Prefer voices that exactly match lang
+  if (v.lang === lang) score += 20;
+  return score;
+}
+
+function getBestVoice(lang) {
+  if (voiceCache[lang]) return voiceCache[lang];
+  const voices = speechSynthesis.getVoices();
+  const langBase = lang.split('-')[0];
+  const candidates = voices.filter(v =>
+    v.lang === lang || v.lang.startsWith(langBase + '-') || v.lang.startsWith(langBase)
+  );
+  if (!candidates.length) return null;
+  candidates.sort((a,b) => scoreVoice(b,lang) - scoreVoice(a,lang));
+  voiceCache[lang] = candidates[0];
+  return candidates[0];
+}
+
+function updateVoiceIndicator() {
+  const voice = getBestVoice(dictLang);
+  const el = document.getElementById('voiceIndicator');
+  const t = T[uiLang];
+  if (!el) return;
+  if (voice) {
+    const isGood = scoreVoice(voice, dictLang) >= 60;
+    el.className = 'voice-indicator ' + (isGood ? 'good' : 'warn');
+    el.textContent = t.voiceUsing + ' ' + voice.name;
+  } else {
+    el.className = 'voice-indicator warn';
+    el.textContent = t.voiceNone;
+  }
+}
+
+function listAvailableVoices() {
+  const voices = speechSynthesis.getVoices();
+  const langs = ['de-DE','en-US','fr-FR','es-ES','it-IT'];
+  const el = document.getElementById('availableVoices');
+  if (!el) return;
+  let html = '';
+  langs.forEach(lang => {
+    const best = getBestVoice(lang);
+    const flag = {de:'🇩🇪',en:'🇬🇧',fr:'🇫🇷',es:'🇪🇸',it:'🇮🇹'}[lang.split('-')[0]];
+    if (best) {
+      const quality = scoreVoice(best, lang);
+      const star = quality>=90?'⭐⭐⭐':quality>=60?'⭐⭐':'⭐';
+      html += `${flag} ${best.name} ${star}<br>`;
+    } else {
+      html += `${flag} – keine Stimme gefunden<br>`;
+    }
+  });
+  el.innerHTML = html || '–';
+}
+
+// Re-cache voices when they load (especially on Chrome)
+speechSynthesis.addEventListener('voiceschanged', () => {
+  voiceCache = {};
+  updateVoiceIndicator();
+  listAvailableVoices();
+});
+
+// ── INIT ──────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
+  uiLang     = localStorage.getItem('dUiLang')   || 'de';
+  dictLang   = localStorage.getItem('dDictLang') || 'de-DE';
   rate       = parseFloat(localStorage.getItem('dRate')  || '0.7');
   repeats    = parseInt(localStorage.getItem('dRep')     || '3');
   writePause = parseInt(localStorage.getItem('dPause')   || '4500');
-  punctOn    = localStorage.getItem('dPunct') !== 'false';
+  punctOn    = localStorage.getItem('dPunct')  !== 'false';
+  hideMode   = localStorage.getItem('dHide')   === 'true';
 
   document.getElementById('speedSlider').value = rate;
-  document.getElementById('speedVal').textContent = rate.toFixed(2) + '×';
+  document.getElementById('speedVal').textContent = rate.toFixed(2)+'×';
   document.getElementById('pauseSlider').value = writePause;
-  document.getElementById('pauseVal').textContent = (writePause/1000).toFixed(1) + 's';
-  document.getElementById('punctToggle').className = 'toggle' + (punctOn ? ' on' : '');
+  document.getElementById('pauseVal').textContent = (writePause/1000).toFixed(1)+'s';
+  document.getElementById('punctToggle').className = 'toggle'+(punctOn?' on':'');
+  document.getElementById('hideToggle').className  = 'toggle'+(hideMode?' on':'');
   setRepeat(repeats, true);
+
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang===dictLang);
+    if (b.dataset.lang===dictLang) tessLang = b.dataset.tess;
+  });
 
   document.getElementById('speedSlider').addEventListener('input', e => {
     rate = parseFloat(e.target.value);
-    document.getElementById('speedVal').textContent = rate.toFixed(2) + '×';
+    document.getElementById('speedVal').textContent = rate.toFixed(2)+'×';
     localStorage.setItem('dRate', rate);
   });
   document.getElementById('pauseSlider').addEventListener('input', e => {
     writePause = parseInt(e.target.value);
-    document.getElementById('pauseVal').textContent = (writePause/1000).toFixed(1) + 's';
+    document.getElementById('pauseVal').textContent = (writePause/1000).toFixed(1)+'s';
     localStorage.setItem('dPause', writePause);
   });
 
   document.getElementById('inputFileHidden').addEventListener('change', handlePhoto);
-
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   if (isIOS && !window.navigator.standalone) {
-    const h = document.getElementById('installHint');
-    h.style.display = 'block';
-    h.innerHTML = '📱 <strong>Tipp:</strong> Teilen (□↑) → „Zum Home-Bildschirm" zum Installieren.';
+    document.getElementById('installHint').style.display = 'block';
   }
+
+  applyUiLang(uiLang);
+
+  // Trigger voice load
+  setTimeout(() => { speechSynthesis.getVoices(); updateVoiceIndicator(); listAvailableVoices(); }, 300);
 });
 
-const icons = ['📝','🎙️','⚙️'];
-function showScreen(i) {
-  document.querySelectorAll('.screen').forEach((s,j) => s.classList.toggle('active', i===j));
-  document.querySelectorAll('.nav-btn').forEach((b,j) => b.classList.toggle('active', i===j));
-  document.getElementById('topbarIcon').textContent = icons[i];
+// ── UI LANGUAGE ───────────────────────────────────────
+function setUiLang(lang) {
+  uiLang = lang; localStorage.setItem('dUiLang', lang);
+  document.getElementById('uilDE').classList.toggle('active', lang==='de');
+  document.getElementById('uilEN').classList.toggle('active', lang==='en');
+  applyUiLang(lang);
 }
 
+function applyUiLang(lang) {
+  const t = T[lang];
+  document.getElementById('topSub').textContent = t.topSub;
+  document.getElementById('installHint').innerHTML = t.installHint;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.dataset.i18n; if (t[k]!==undefined) el.innerHTML = t[k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const k = el.dataset.i18nPh; if (t[k]!==undefined) el.placeholder = t[k];
+  });
+  const ps = document.getElementById('playerStatus');
+  if (ps && (!ps.textContent || ps.textContent===T.de.ready || ps.textContent===T.en.ready))
+    ps.textContent = t.ready;
+  updateVoiceIndicator();
+}
+
+// ── DICTATION LANGUAGE ────────────────────────────────
+function setDictLang(btn) {
+  dictLang = btn.dataset.lang; tessLang = btn.dataset.tess;
+  localStorage.setItem('dDictLang', dictLang);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b===btn));
+  voiceCache = {};
+  updateVoiceIndicator();
+  sentences = sentences.map(s=>({ display:s.display, spoken:toSpoken(s.display) }));
+}
+
+// ── SCREENS ───────────────────────────────────────────
+function showScreen(i) {
+  document.querySelectorAll('.screen').forEach((s,j) => s.classList.toggle('active',i===j));
+  document.querySelectorAll('.nav-btn').forEach((b,j) => b.classList.toggle('active',i===j));
+  if (i===2) listAvailableVoices();
+}
+
+// ── HIDE MODE ─────────────────────────────────────────
+function toggleHide() {
+  hideMode = !hideMode;
+  document.getElementById('hideToggle').className = 'toggle'+(hideMode?' on':'');
+  localStorage.setItem('dHide', hideMode);
+  applyHideMode();
+}
+
+function applyHideMode() {
+  const ol = document.getElementById('sentenceList');
+  ol.classList.toggle('hide-mode', hideMode);
+  // All unread sentences get hidden-text class
+  if (hideMode) {
+    [...ol.children].forEach((li, j) => {
+      if (j > currentIdx) li.classList.add('hidden-text');
+    });
+  } else {
+    [...ol.children].forEach(li => li.classList.remove('hidden-text'));
+  }
+}
+
+function revealSentence(i) {
+  if (!hideMode) return;
+  const ol = document.getElementById('sentenceList');
+  if (ol.children[i]) ol.children[i].classList.remove('hidden-text');
+}
+
+// ── TEXT INPUT ────────────────────────────────────────
 function focusPaste() { document.getElementById('pasteArea').focus(); }
 function triggerPhoto() { document.getElementById('inputFileHidden').click(); }
 
 async function handlePhoto(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   const preview = document.getElementById('photoPreview');
-  preview.src = URL.createObjectURL(file);
-  preview.style.display = 'block';
-  await runOCR(file);
-  // Reset so same file can be selected again
-  e.target.value = '';
+  preview.src = URL.createObjectURL(file); preview.style.display = 'block';
+  await runOCR(file); e.target.value = '';
 }
 
 async function runOCR(file) {
-  const statusEl   = document.getElementById('ocrStatus');
-  const progressW  = document.getElementById('ocrProgressWrap');
-  const progressF  = document.getElementById('ocrProgressFill');
-
-  statusEl.style.color = 'var(--green)';
-  statusEl.textContent = '🔍 Texterkennung läuft…';
-  progressW.style.display = 'block';
-  progressF.style.width = '0%';
-
+  const t=T[uiLang], st=document.getElementById('ocrStatus'),
+        pw=document.getElementById('ocrProgressWrap'), pf=document.getElementById('ocrProgressFill');
+  st.style.color='var(--green)'; st.textContent=t.ocrRunning;
+  pw.style.display='block'; pf.style.width='0%';
   try {
-    const result = await Tesseract.recognize(file, 'deu', {
+    const result = await Tesseract.recognize(file, tessLang, {
       logger: m => {
-        if (m.status === 'recognizing text') {
-          const pct = Math.round((m.progress || 0) * 100);
-          progressF.style.width = pct + '%';
-          statusEl.textContent = `🔍 Erkenne Text… ${pct}%`;
+        if (m.status==='recognizing text') {
+          const p=Math.round((m.progress||0)*100);
+          pf.style.width=p+'%'; st.textContent=t.ocrProgress(p);
         }
       }
     });
-
-    progressF.style.width = '100%';
+    pf.style.width='100%';
     const text = result.data.text.trim();
-    if (text) {
-      document.getElementById('pasteArea').value = text;
-      statusEl.textContent = '✅ Text erkannt – bitte prüfen und ggf. korrigieren.';
-    } else {
-      statusEl.textContent = '⚠️ Kein Text erkannt. Bitte manuell eingeben.';
-      statusEl.style.color = '#c9184a';
-    }
-  } catch(err) {
-    statusEl.textContent = '❌ Fehler bei der Erkennung: ' + err.message;
-    statusEl.style.color = '#c9184a';
-  }
-
-  setTimeout(() => { progressW.style.display = 'none'; }, 1500);
+    if (text) { document.getElementById('pasteArea').value=text; st.textContent=t.ocrDone; }
+    else { st.textContent=t.ocrEmpty; st.style.color='#c9184a'; }
+  } catch(err) { st.textContent=t.ocrError(err.message); st.style.color='#c9184a'; }
+  setTimeout(()=>{ pw.style.display='none'; }, 1500);
 }
 
 function loadSample() {
-  document.getElementById('pasteArea').value =
-`Als unser Hund einmal krank war, haben wir ihn in eine Tierklinik gebracht. Dort hat ihn ein Tierarzt untersucht. Daraufhin gab er ihm eine Spritze. Das gefiel ihm gar nicht und er wollte den Tierarzt sogar in den Finger beissen. Wahrscheinlich hatte er Angst vor ihm. Seitdem will unser Hund nicht mehr zum Tierarzt.
-
-Wenn er bei der Praxis ankommt, bleibt er im Auto liegen und wir können ihn nicht dazu bringen, dass er freiwillig in die Praxis geht. Deswegen müssen wir ihn jeweils tragen.
-
-In der Praxis jedoch wird für ihn immer sehr gut geschaut, alle mögen ihn und wenn er gut mitmacht, bekommt er immer etwas Gutes als Belohnung.`;
+  document.getElementById('pasteArea').value = SAMPLES[dictLang]||SAMPLES['de-DE'];
   document.getElementById('ocrStatus').textContent = '';
 }
 
 function loadText() {
-  const raw = document.getElementById('pasteArea').value.trim();
-  if (!raw) { alert('Bitte zuerst einen Text eingeben.'); return; }
-  parseSentences(raw);
-  showScreen(1);
+  const raw=document.getElementById('pasteArea').value.trim();
+  const t=T[uiLang]; if(!raw){alert(t.noText);return;}
+  parseSentences(raw); showScreen(1);
 }
 
+// ── SENTENCE PARSING ──────────────────────────────────
 function parseSentences(text) {
   const parts = text.match(/[^.!?]+[.!?]+/g);
-  sentences = (parts || [text])
-    .map(s => s.trim()).filter(s => s.length > 3)
-    .map(s => ({ display: s, spoken: toSpoken(s) }));
-
+  sentences = (parts||[text]).map(s=>s.trim()).filter(s=>s.length>3)
+    .map(s=>({display:s, spoken:toSpoken(s)}));
   buildSentenceList();
-  document.getElementById('playerEmpty').style.display = 'none';
-  document.getElementById('playerContent').style.display = 'block';
-  document.getElementById('progressFill').style.width = '0';
-  document.getElementById('playerStatus').textContent = 'Bereit – drücke Start ▶';
-  currentIdx = -1;
-  document.getElementById('btnRepeat').disabled = true;
-  document.getElementById('btnStop').disabled = true;
-  document.getElementById('btnStart').disabled = false;
+  document.getElementById('playerEmpty').style.display='none';
+  document.getElementById('playerContent').style.display='block';
+  document.getElementById('progressFill').style.width='0';
+  document.getElementById('playerStatus').textContent=T[uiLang].ready;
+  updateVoiceIndicator();
+  currentIdx=-1;
+  document.getElementById('btnRepeat').disabled=true;
+  document.getElementById('btnStop').disabled=true;
+  document.getElementById('btnStart').disabled=false;
 }
 
 function toSpoken(text) {
-  if (!punctOn) return text.replace(/[,\.!?;:]/g, '');
-  return text
-    .replace(/,/g,  ' KOMMA ')
-    .replace(/\./g, ' PUNKT')
-    .replace(/!/g,  ' AUSRUFEZEICHEN')
-    .replace(/\?/g, ' FRAGEZEICHEN')
-    .replace(/;/g,  ' STRICHPUNKT ')
-    .replace(/:/g,  ' DOPPELPUNKT ')
-    .replace(/\s{2,}/g, ' ').trim();
+  if (!punctOn) return text.replace(/[,\.!?;:]/g,'');
+  const p=PUNCT[dictLang]||PUNCT['de-DE'];
+  return text.replace(/,/g,p[',']).replace(/\./g,p['.']).replace(/!/g,p['!']).replace(/\?/g,p['?'])
+    .replace(/;/g,p[';']).replace(/:/g,p[':']).replace(/\s{2,}/g,' ').trim();
 }
 
 function buildSentenceList() {
-  const ol = document.getElementById('sentenceList');
-  ol.innerHTML = '';
-  sentences.forEach((s, i) => {
-    const li = document.createElement('li');
-    li.innerHTML = s.display + '<span class="s-badge" id="sb'+i+'"></span>';
-    li.onclick = () => jumpTo(i);
+  const ol=document.getElementById('sentenceList'); ol.innerHTML='';
+  sentences.forEach((s,i)=>{
+    const li=document.createElement('li');
+    li.innerHTML=s.display+'<span class="s-badge" id="sb'+i+'"></span>';
+    li.onclick=()=>jumpTo(i);
+    if (hideMode) li.classList.add('hidden-text');
     ol.appendChild(li);
   });
+  ol.classList.toggle('hide-mode', hideMode);
 }
 
-function getBadge(i) { return document.getElementById('sb'+i); }
+function getBadge(i){return document.getElementById('sb'+i);}
 
 function setActive(i) {
-  const items = document.getElementById('sentenceList').children;
-  [...items].forEach((li, j) => {
-    li.classList.toggle('active', j===i);
-    li.classList.toggle('done',   j<i);
+  const items=document.getElementById('sentenceList').children;
+  [...items].forEach((li,j)=>{
+    li.classList.toggle('active',j===i);
+    li.classList.toggle('done',j<i);
   });
-  if (i >= 0) document.getElementById('sentenceList').children[i]?.scrollIntoView({ behavior:'smooth', block:'nearest' });
-  document.getElementById('progressFill').style.width = (Math.max(0,i)/sentences.length*100)+'%';
+  if (i>=0) items[i]?.scrollIntoView({behavior:'smooth',block:'nearest'});
+  document.getElementById('progressFill').style.width=(Math.max(0,i)/sentences.length*100)+'%';
 }
 
+// ── TTS ───────────────────────────────────────────────
 function speakPromise(text) {
-  return new Promise(res => {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang='de-DE'; u.rate=rate; u.pitch=1.0;
+  return new Promise(res=>{
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang=dictLang; u.rate=rate; u.pitch=1.0;
+    // Assign best voice
+    const best=getBestVoice(dictLang);
+    if (best) u.voice=best;
     u.onend=res; u.onerror=res;
     speechSynthesis.speak(u);
   });
 }
-const wait = ms => new Promise(res => setTimeout(res, ms));
+const wait=ms=>new Promise(res=>setTimeout(res,ms));
 
 async function startDiktat() {
   speechSynthesis.cancel();
-  sentences.forEach((_,i)=>{ if(getBadge(i)) getBadge(i).textContent=''; });
+  sentences.forEach((_,i)=>{if(getBadge(i)) getBadge(i).textContent='';});
+  buildSentenceList(); // re-apply hide mode from scratch
   await runFrom(0);
 }
 
 async function runFrom(startIdx) {
-  stopReq = false;
-  document.getElementById('btnStart').disabled  = true;
-  document.getElementById('btnStop').disabled   = false;
-  document.getElementById('btnRepeat').disabled = true;
+  const t=T[uiLang]; stopReq=false;
+  document.getElementById('btnStart').disabled=true;
+  document.getElementById('btnStop').disabled=false;
+  document.getElementById('btnRepeat').disabled=true;
 
-  for (let i = startIdx; i < sentences.length; i++) {
+  for (let i=startIdx; i<sentences.length; i++) {
     if (stopReq) break;
-    currentIdx = i;
+    currentIdx=i;
     setActive(i);
-    for (let r = 1; r <= repeats; r++) {
+    for (let r=1; r<=repeats; r++) {
       if (stopReq) break;
-      getBadge(i).textContent = r+'/'+repeats;
-      document.getElementById('playerStatus').textContent = `Satz ${i+1}/${sentences.length} – Lesung ${r} von ${repeats}`;
+      getBadge(i).textContent=r+'/'+repeats;
+      document.getElementById('playerStatus').textContent=t.sentenceStatus(i+1,sentences.length,r,repeats);
       await speakPromise(sentences[i].spoken);
-      if (r < repeats && !stopReq) await wait(1000);
+      if (r<repeats && !stopReq) await wait(1000);
     }
     if (stopReq) break;
-    getBadge(i).textContent = '✓';
-    if (i < sentences.length-1 && !stopReq) {
-      document.getElementById('playerStatus').textContent = `✍️ Schreiben… (${(writePause/1000).toFixed(1)} Sek.)`;
+    getBadge(i).textContent='✓';
+    if (i<sentences.length-1 && !stopReq) {
+      document.getElementById('playerStatus').textContent=t.writing((writePause/1000).toFixed(1));
       await wait(writePause);
     }
   }
@@ -481,53 +702,52 @@ async function runFrom(startIdx) {
   if (!stopReq) {
     setActive(-1);
     await wait(600);
-    document.getElementById('playerStatus').textContent = '📖 Kontrolllesung…';
+    document.getElementById('playerStatus').textContent=t.controlReading;
     for (const s of sentences) {
       if (stopReq) break;
-      await speakPromise(s.spoken);
-      await wait(400);
+      await speakPromise(s.spoken); await wait(400);
     }
     if (!stopReq) {
-      document.getElementById('playerStatus').textContent = '✅ Diktat beendet! Stift ablegen.';
-      document.getElementById('progressFill').style.width = '100%';
+      document.getElementById('playerStatus').textContent=t.finished;
+      document.getElementById('progressFill').style.width='100%';
     }
   }
 
-  document.getElementById('btnStart').disabled  = false;
-  document.getElementById('btnStop').disabled   = true;
-  document.getElementById('btnRepeat').disabled = currentIdx < 0;
+  document.getElementById('btnStart').disabled=false;
+  document.getElementById('btnStop').disabled=true;
+  document.getElementById('btnRepeat').disabled=currentIdx<0;
 }
 
 function stopDiktat() {
-  stopReq = true;
-  speechSynthesis.cancel();
-  document.getElementById('playerStatus').textContent = '⏹ Gestoppt.';
-  document.getElementById('btnStart').disabled  = false;
-  document.getElementById('btnStop').disabled   = true;
-  document.getElementById('btnRepeat').disabled = currentIdx < 0;
+  stopReq=true; speechSynthesis.cancel();
+  document.getElementById('playerStatus').textContent=T[uiLang].stopped;
+  document.getElementById('btnStart').disabled=false;
+  document.getElementById('btnStop').disabled=true;
+  document.getElementById('btnRepeat').disabled=currentIdx<0;
 }
 
-function repeatCurrent() { speechSynthesis.cancel(); runFrom(currentIdx); }
+function repeatCurrent(){speechSynthesis.cancel(); runFrom(currentIdx);}
 
 function jumpTo(i) {
-  speechSynthesis.cancel(); stopReq = true;
-  setTimeout(() => {
-    sentences.forEach((_,j)=>{ if(getBadge(j)) getBadge(j).textContent=''; });
-    runFrom(i);
+  if (hideMode) return; // block clicking ahead in hide mode
+  speechSynthesis.cancel(); stopReq=true;
+  setTimeout(()=>{
+    sentences.forEach((_,j)=>{if(getBadge(j)) getBadge(j).textContent='';});
+    buildSentenceList(); runFrom(i);
   }, 150);
 }
 
-function setRepeat(v, silent) {
-  repeats = v;
-  document.querySelectorAll('.rep-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.v)===v));
-  if (!silent) localStorage.setItem('dRep', v);
+function setRepeat(v,silent) {
+  repeats=v;
+  document.querySelectorAll('.rep-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.v)===v));
+  if (!silent) localStorage.setItem('dRep',v);
 }
 
 function togglePunct() {
-  punctOn = !punctOn;
-  document.getElementById('punctToggle').className = 'toggle'+(punctOn?' on':'');
-  localStorage.setItem('dPunct', punctOn);
-  sentences = sentences.map(s => ({ display: s.display, spoken: toSpoken(s.display) }));
+  punctOn=!punctOn;
+  document.getElementById('punctToggle').className='toggle'+(punctOn?' on':'');
+  localStorage.setItem('dPunct',punctOn);
+  sentences=sentences.map(s=>({display:s.display,spoken:toSpoken(s.display)}));
 }
 </script>
 </body>
