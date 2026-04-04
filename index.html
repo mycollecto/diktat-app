@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="DiktatApp">
+<meta name="apple-mobile-web-app-title" content="Diktat-App">
 <meta name="theme-color" content="#2d6a4f">
 <link rel="manifest" href="manifest.json">
-<title>DiktatApp</title>
+<title>Diktat-App für die Schule</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
@@ -115,8 +115,8 @@ textarea#pasteArea:focus{border-color:var(--greenl)}
 
   <div class="topbar">
     <div>
-      <h1>🎙 DiktatApp</h1>
-      <div class="sub" id="topSub">Automatisches Diktat fur die Schule</div>
+      <h1>🎙 Diktat-App</h1>
+      <div class="sub" id="topSub">für die Schule</div>
     </div>
     <div class="ui-lang-toggle">
       <button class="ui-lang-btn active" onclick="setUiLang('de')">DE</button>
@@ -153,6 +153,7 @@ textarea#pasteArea:focus{border-color:var(--greenl)}
         <img id="photoPreview" alt="Preview">
         <div class="progress-ocr" id="ocrWrap"><div class="progress-ocr-fill" id="ocrFill"></div></div>
         <div class="ocr-status" id="ocrStatus"></div>
+        <div class="info-box" id="cameraHint" style="margin-bottom:10px"></div>
         <textarea id="pasteArea" id="lPlaceholder"></textarea>
       </div>
       <button class="btn-primary" onclick="loadText()" id="lStartBtn">Diktat starten &rarr;</button>
@@ -249,35 +250,36 @@ textarea#pasteArea:focus{border-color:var(--greenl)}
 // ── TRANSLATIONS ──────────────────────────────────────
 const L = {
   de: {
-    topSub: 'Automatisches Diktat fur die Schule',
+    topSub: 'für die Schule',
+    cameraHint: '📱 Tipp: Beste Qualität mit der Kamera-App! Foto machen → Textsymbol tippen → Alles kopieren → hier einfügen.',
     dictLang: 'Diktat-Sprache', enterText: 'Text eingeben',
-    pasteBtn: 'Eintippen & Einfugen', photoBtn: 'Foto aufnehmen',
-    placeholder: 'Diktat-Text hier einfugen oder eintippen...',
+    pasteBtn: 'Eintippen & Einfügen', photoBtn: 'Foto aufnehmen',
+    placeholder: 'Diktat-Text hier einfügen oder eintippen...',
     startBtn: 'Diktat starten', sampleBtn: 'Beispieltext laden',
-    playerEmpty: 'Text eingeben und Diktat starten drucken',
+    playerEmpty: 'Text eingeben und Diktat starten drücken',
     btnStart: 'Start', btnRepeat: 'Wdh.', btnStop: 'Stop',
     hideLabel: 'Text verbergen',
     playback: 'Wiedergabe', tempo: 'Tempo', repeats: 'Wiederholungen',
     punct: 'Satzzeichen ansagen', pause: 'Pause',
     voiceTitle: 'Stimme',
-    voiceInfo1: 'Beste Stimme wird automatisch gewahlt',
+    voiceInfo1: 'Beste Stimme wird automatisch gewählt',
     voiceInfo2: 'iPhone: Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Verbessert herunterladen',
     ocrTitle: 'Foto-Texterkennung',
-    ocrInfo: 'Komplett kostenlos – kein Account notig',
-    ocrInfo2: 'Lauft direkt auf deinem Gerat. Keine Daten werden hochgeladen.',
+    ocrInfo: 'Komplett kostenlos – kein Account nötig',
+    ocrInfo2: 'Läuft direkt auf deinem Gerät. Keine Daten werden hochgeladen.',
     installTitle: 'App installieren',
     installInfo1: 'Auf dem Homescreen installieren:',
     installInfo2: 'iPhone/iPad: Safari → Teilen → Zum Home-Bildschirm<br>Android: Chrome → Menu → App installieren',
     navText: 'Text', navDiktat: 'Diktat', navSettings: 'Einstellungen',
-    ready: 'Bereit – druecke Start',
+    ready: 'Bereit – drücke Start',
     sentStatus: (i,n,r,rn) => 'Satz '+i+'/'+n+' – Lesung '+r+' von '+rn,
     writing: s => 'Schreiben... ('+s+' Sek.)',
     finalRead: 'Kontrolllesung...',
     finished: 'Diktat beendet! Stift ablegen.',
     stopped: 'Gestoppt.',
-    ocrRunning: 'Texterkennung lauft...',
+    ocrRunning: 'Texterkennung läuft...',
     ocrProgress: p => 'Erkenne Text... '+p+'%',
-    ocrDone: 'Text erkannt – bitte pruefen.',
+    ocrDone: 'Text erkannt – bitte prüfen.',
     ocrEmpty: 'Kein Text erkannt. Bitte manuell eingeben.',
     ocrErr: e => 'Fehler: '+e,
     noText: 'Bitte zuerst einen Text eingeben.',
@@ -286,7 +288,8 @@ const L = {
     voiceNone: 'Standard-Stimme'
   },
   en: {
-    topSub: 'Automatic dictation for school',
+    topSub: 'for school',
+    cameraHint: '📱 Tip: Best quality with the Camera app! Take photo → tap Text symbol → Copy all → paste here.',
     dictLang: 'Dictation language', enterText: 'Enter text',
     pasteBtn: 'Type & Paste', photoBtn: 'Take a photo',
     placeholder: 'Paste or type dictation text here...',
@@ -333,7 +336,7 @@ const PUNCT = {
 };
 
 const SAMPLES = {
-  'de-DE': 'Als unser Hund einmal krank war, haben wir ihn in eine Tierklinik gebracht. Dort hat ihn ein Tierarzt untersucht. Daraufhin gab er ihm eine Spritze. Das gefiel ihm gar nicht und er wollte den Tierarzt sogar in den Finger beissen. Wahrscheinlich hatte er Angst vor ihm. Seitdem will unser Hund nicht mehr zum Tierarzt. Wenn er bei der Praxis ankommt, bleibt er im Auto liegen und wir koennen ihn nicht dazu bringen, dass er freiwillig in die Praxis geht. Deswegen muessen wir ihn jeweils tragen. In der Praxis jedoch wird fuer ihn immer sehr gut geschaut, alle moegen ihn und wenn er gut mitmacht, bekommt er immer etwas Gutes als Belohnung.',
+  'de-DE': 'Als unser Hund einmal krank war, haben wir ihn in eine Tierklinik gebracht. Dort hat ihn ein Tierarzt untersucht. Daraufhin gab er ihm eine Spritze. Das gefiel ihm gar nicht und er wollte den Tierarzt sogar in den Finger beissen. Wahrscheinlich hatte er Angst vor ihm. Seitdem will unser Hund nicht mehr zum Tierarzt. Wenn er bei der Praxis ankommt, bleibt er im Auto liegen und wir können ihn nicht dazu bringen, dass er freiwillig in die Praxis geht. Deswegen müssen wir ihn jeweils tragen. In der Praxis jedoch wird für ihn immer sehr gut geschaut, alle mögen ihn und wenn er gut mitmacht, bekommt er immer etwas Gutes als Belohnung.',
   'en-US': 'Our dog was once sick, so we took him to an animal clinic. There a vet examined him. Afterwards, the vet gave him an injection. The dog did not like that at all and even tried to bite the vet\'s finger. He was probably scared. Since then, our dog refuses to go to the vet. Whenever we arrive at the clinic, he stays in the car and we cannot get him to walk in voluntarily. So we have to carry him every time. However, inside the clinic he is always very well looked after, everyone likes him, and if he behaves, he always gets a treat as a reward.',
   'fr-FR': 'Notre chien etait malade un jour, alors nous l\'avons emmene dans une clinique veterinaire. Un veterinaire l\'a examine. Ensuite, il lui a fait une piqure. Cela ne lui a pas du tout plu et il a voulu mordre le veterinaire au doigt. Il avait probablement peur de lui. Depuis lors, notre chien ne veut plus aller chez le veterinaire. Quand il arrive devant le cabinet, il reste dans la voiture. C\'est pourquoi nous devons le porter a chaque fois. Dans le cabinet cependant, il est toujours tres bien soigne et il recoit quelque chose de bon en recompense.',
   'es-ES': 'Nuestro perro estuvo enfermo una vez, asi que lo llevamos a una clinica veterinaria. Alli lo examino un veterinario. Luego le puso una inyeccion. Al perro no le gusto nada y hasta intento morder el dedo del veterinario. Probablemente tenia miedo de el. Desde entonces, nuestro perro no quiere volver al veterinario. Cuando llegamos a la consulta, se queda en el coche. Por eso tenemos que cargarlo cada vez. Sin embargo, en la consulta siempre lo cuidan muy bien y recibe algo bueno como recompensa.',
@@ -430,6 +433,7 @@ function setUiLang(lang) {
 function applyLang() {
   var t = L[uiLang];
   document.getElementById('topSub').textContent         = t.topSub;
+  document.getElementById('cameraHint').textContent     = t.cameraHint;
   document.getElementById('lDictLang').textContent      = t.dictLang;
   document.getElementById('lEnterText').textContent     = t.enterText;
   document.getElementById('lPasteBtn').textContent      = t.pasteBtn;
